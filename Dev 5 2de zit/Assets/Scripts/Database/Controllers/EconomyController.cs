@@ -56,30 +56,30 @@ public class EconomyController : MonoBehaviour
     }
 
 
-    private void HandleTick()
+private void HandleTick()
+{
+    var res = DatabaseBootstrapper.Resources.GetByName(resourceName);
+    if (res == null) return;
+
+    res.Quantity += resourcePerTick;
+
+    if (enableConsumption)
+        res.Quantity = Mathf.Max(0, res.Quantity - consumptionPerTick);
+
+    res.Price = _pricing.Compute(basePrice, res.Quantity);
+
+    DatabaseBootstrapper.Resources.Update(res);
+
+    DatabaseBootstrapper.Transactions.Insert(new Transaction
     {
-        var res = DatabaseBootstrapper.Resources.GetByName(resourceName);
-        if (res == null) return;
+        ResourceName = res.Name,
+        Quantity = res.Quantity,
+        Price = res.Price,
+        Timestamp = System.DateTime.UtcNow
+    });
 
-        res.Quantity += resourcePerTick;
-
-        if (enableConsumption)
-            res.Quantity = Mathf.Max(0, res.Quantity - consumptionPerTick);
-
-        res.Price = _pricing.Compute(basePrice, res.Quantity);
-
-        DatabaseBootstrapper.Resources.Update(res);
-
-        DatabaseBootstrapper.Transactions.Insert(new Transaction
-        {
-            ResourceName = res.Name,
-            Quantity = res.Quantity,
-            Price = res.Price,
-            Timestamp = System.DateTime.UtcNow
-        });
-
-        UpdateUI();
-    }
+    UpdateUI();
+}
 
     private void UpdateUI()
     {
@@ -92,7 +92,6 @@ public class EconomyController : MonoBehaviour
         if (priceText != null)
             priceText.text = $"€{res.Price:0.00}";
 
-        // Haal alleen de laatste 3 transacties op van de huidige resource
         var lastTransactions = DatabaseBootstrapper.Transactions
             .GetByResourceName(resourceName)
             .OrderByDescending(t => t.Timestamp)
