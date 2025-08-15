@@ -6,8 +6,11 @@ namespace EconomySim.Database.Models
     public class Resource
     {
         [PrimaryKey, AutoIncrement] public int Id { get; set; }
+
         [Unique, NotNull] public string Name { get; set; }
-        [NotNull] public int Quantity { get; set; }
-        [NotNull] public float Price { get; set; }
+
+        public int Quantity { get; set; }
+
+        public float Price { get; set; }
     }
 }
