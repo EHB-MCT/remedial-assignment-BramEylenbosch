@@ -7,6 +7,6 @@ namespace EconomySim.Database.Models
     {
         [PrimaryKey, AutoIncrement] public int Id { get; set; }
         [Unique, NotNull] public string Name { get; set; }
-        public float Balance { get; set; }  // Geld van speler
+        public float Balance { get; set; } 
     }
 }

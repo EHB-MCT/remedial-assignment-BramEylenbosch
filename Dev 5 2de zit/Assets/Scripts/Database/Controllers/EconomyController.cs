@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using EconomySim.Database.Bootstrap;
 using EconomySim.Database.Models;
+using EconomySim.Simulation.Services;
 
 public class EconomyController : MonoBehaviour
 {
@@ -9,31 +10,42 @@ public class EconomyController : MonoBehaviour
     public string resourceName = "Wood";
     public int resourcePerTick = 5;
 
+    [Header("Pricing (tweak in Inspector)")]
+    public float basePrice   = 10f;
+    public float minPrice    = 0.5f;
+    public float maxPrice    = 50f;
+    public int   targetStock = 100;
+    public float elasticity  = 1.2f;
+
     [Header("UI")]
     public TMP_Text resourceText;
 
+    private IPricingService _pricing;
+    
+
     void Start()
     {
-        // Ensure DB bootstrap has run (put DatabaseBootstrapper in scene)
+        _pricing = new DynamicPricingService(minPrice, maxPrice, targetStock, elasticity);
+
+        var res = DatabaseBootstrapper.Resources.GetByName(resourceName);
+        if (res == null)
+        {
+            res = new Resource { Name = resourceName, Quantity = 0, Price = basePrice };
+            DatabaseBootstrapper.Resources.Insert(res);
+        }
+
         SimulationManager.Instance.OnTick += HandleTick;
         UpdateUI();
     }
 
     private void HandleTick()
     {
-        // Get or create the resource
         var res = DatabaseBootstrapper.Resources.GetByName(resourceName);
-        if (res == null)
-        {
-            res = new Resource { Name = resourceName, Quantity = 0, Price = 1f };
-            DatabaseBootstrapper.Resources.Insert(res);
-        }
+        if (res == null) return;
 
-        // Simple production
         res.Quantity += resourcePerTick;
 
-        // (Optional) simple pricing logic: cheaper when plenty, more expensive when scarce
-        res.Price = Mathf.Max(0.1f, res.Price + (res.Quantity < 50 ? 0.1f : -0.05f));
+        res.Price = _pricing.Compute(basePrice, res.Quantity);
 
         DatabaseBootstrapper.Resources.Update(res);
         UpdateUI();
@@ -50,7 +62,7 @@ public class EconomyController : MonoBehaviour
         }
         else
         {
-            resourceText.text = $"{resourceName}: 0";
+            resourceText.text = $"{resourceName}: 0  |  €{basePrice:0.00}";
         }
     }
 }

@@ -1,6 +1,6 @@
 using UnityEngine;
-using SQLite;           // uit de package
-using System.IO;       // voor Path.Combine
+using SQLite;          
+using System.IO;     
 using System.Linq;
 using System;
 
