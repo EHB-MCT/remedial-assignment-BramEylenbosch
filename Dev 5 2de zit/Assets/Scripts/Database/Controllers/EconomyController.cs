@@ -42,21 +42,31 @@ public class EconomyController : MonoBehaviour
         UpdateUI();
     }
 
-    private void HandleTick()
+private void HandleTick()
+{
+    var res = DatabaseBootstrapper.Resources.GetByName(resourceName);
+    if (res == null) return;
+
+    res.Quantity += resourcePerTick;
+
+    if (enableConsumption)
+        res.Quantity = Mathf.Max(0, res.Quantity - consumptionPerTick);
+
+    res.Price = _pricing.Compute(basePrice, res.Quantity);
+
+    DatabaseBootstrapper.Resources.Update(res);
+
+    DatabaseBootstrapper.Transactions.Insert(new EconomySim.Database.Models.Transaction
     {
-        var res = DatabaseBootstrapper.Resources.GetByName(resourceName);
-        if (res == null) return;
+        ResourceName = res.Name,
+        Quantity = res.Quantity,
+        Price = res.Price,
+        Timestamp = System.DateTime.UtcNow
+    });
 
-        res.Quantity += resourcePerTick;
+    UpdateUI();
+}
 
-        if (enableConsumption)
-            res.Quantity = Mathf.Max(0, res.Quantity - consumptionPerTick);
-
-        res.Price = _pricing.Compute(basePrice, res.Quantity);
-
-        DatabaseBootstrapper.Resources.Update(res);
-        UpdateUI();
-    }
 
     private void UpdateUI()
     {
