@@ -1,8 +1,9 @@
 using UnityEngine;
 using TMPro;
+using System.Linq;
 using EconomySim.Database.Bootstrap;
 using EconomySim.Database.Models;
-using EconomySim.Simulation.Services; // IPricingService & DynamicPricingService
+using EconomySim.Simulation.Services;
 
 public class EconomyController : MonoBehaviour
 {
@@ -23,7 +24,8 @@ public class EconomyController : MonoBehaviour
 
     [Header("UI")]
     public TMP_Text resourceText;
-    public TMP_Text priceText;   
+    public TMP_Text priceText;
+    public TMP_Text transactionsText; 
 
     private IPricingService _pricing;
 
@@ -42,31 +44,30 @@ public class EconomyController : MonoBehaviour
         UpdateUI();
     }
 
-private void HandleTick()
-{
-    var res = DatabaseBootstrapper.Resources.GetByName(resourceName);
-    if (res == null) return;
-
-    res.Quantity += resourcePerTick;
-
-    if (enableConsumption)
-        res.Quantity = Mathf.Max(0, res.Quantity - consumptionPerTick);
-
-    res.Price = _pricing.Compute(basePrice, res.Quantity);
-
-    DatabaseBootstrapper.Resources.Update(res);
-
-    DatabaseBootstrapper.Transactions.Insert(new EconomySim.Database.Models.Transaction
+    private void HandleTick()
     {
-        ResourceName = res.Name,
-        Quantity = res.Quantity,
-        Price = res.Price,
-        Timestamp = System.DateTime.UtcNow
-    });
+        var res = DatabaseBootstrapper.Resources.GetByName(resourceName);
+        if (res == null) return;
 
-    UpdateUI();
-}
+        res.Quantity += resourcePerTick;
 
+        if (enableConsumption)
+            res.Quantity = Mathf.Max(0, res.Quantity - consumptionPerTick);
+
+        res.Price = _pricing.Compute(basePrice, res.Quantity);
+
+        DatabaseBootstrapper.Resources.Update(res);
+
+        DatabaseBootstrapper.Transactions.Insert(new Transaction
+        {
+            ResourceName = res.Name,
+            Quantity = res.Quantity,
+            Price = res.Price,
+            Timestamp = System.DateTime.UtcNow
+        });
+
+        UpdateUI();
+    }
 
     private void UpdateUI()
     {
@@ -78,7 +79,17 @@ private void HandleTick()
 
         if (priceText != null)
             priceText.text = $"€{res.Price:0.00}";
+
+        if (transactionsText != null)
+        {
+            var latest = DatabaseBootstrapper.Transactions
+                .GetLatest(3) // laatste 3
+                .Select(t => $"{t.ResourceName}: {t.Quantity} at €{t.Price:0.00}");
+
+            transactionsText.text = "Last 3 transactions:\n" + string.Join("\n", latest);
+        }
     }
+
 
     [ContextMenu("Reset Resource to 100")]
     public void ResetResourceTo100()
