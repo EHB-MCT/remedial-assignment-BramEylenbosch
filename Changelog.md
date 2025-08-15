@@ -61,3 +61,96 @@ Unity scene geconfigureerd met SimulationManager, EconomyController, en Resource
 Tick-loop getest: resources stijgen met resourcePerTick.
 
 Data persistent getest: waarden blijven bewaard na stoppen en herstarten van de game.
+
+Changelog – dynamic-pricing branch
+Toegevoegd
+
+DynamicPricingService
+
+Nieuwe service geïntroduceerd voor prijsberekening op basis van marktvoorraad.
+
+Ondersteunt parameters:
+
+minPrice / maxPrice
+
+targetStock
+
+elasticity
+
+Prijs verandert automatisch bij elke voorraadwijziging.
+
+HandleTick in EconomyController
+
+Tick-event gekoppeld aan SimulationManager.
+
+Iedere tick:
+
+Productie (resourcePerTick) en optionele consumptie (consumptionPerTick).
+
+Automatische prijsherberekening via DynamicPricingService.
+
+Transactie logging in de database.
+
+Balans & voorraadbeheer in Buy/Sell
+
+BuyResource(resourceName):
+
+Marktvoorraad neemt af bij aankoop.
+
+Spelerbalans vermindert.
+
+Prijs herberekend na transactie.
+
+Transactie gelogd (negatieve hoeveelheid voor aankoop).
+
+SellResource(resourceName):
+
+Marktvoorraad neemt toe bij verkoop.
+
+Spelerbalans stijgt.
+
+Prijs herberekend na transactie.
+
+Transactie gelogd (positieve hoeveelheid voor verkoop).
+
+UI-uitbreidingen
+
+Toegevoegd:
+
+Laatste 3 transacties (transactionsText).
+
+Dynamische balansweergave (balanceText).
+
+Resource- en prijslabels geüpdatet bij elke tick en transactie.
+
+Resetfunctie
+
+ResetResourceTo100() in EconomyController om voorraad handmatig op 100 te zetten en prijs te resetten.
+
+Gewijzigd
+
+Database bootstrap
+
+Initieert nu altijd een speler (Player1) met startbalans €1000 indien nog niet aanwezig.
+
+Initieert resource indien niet aanwezig met basePrice.
+
+Buy/Sell logica
+
+Oude logica vervangen zodat voorraad correct reageert op speleracties.
+
+Prijs nu afhankelijk van actuele voorraad i.p.v. vast bedrag.
+
+SimulationManager integratie
+
+Handmatige voorraadmutaties vervangen door tick-gebaseerde productie en consumptie.
+
+In bewerking
+
+Integratie van Polygon.io API voor live aandelenprijzen:
+
+Meerdere tickers tegelijk ophalen.
+
+Limietbescherming (15 sec interval).
+
+UI koppelen aan live prijs in plaats van interne prijsberekening.

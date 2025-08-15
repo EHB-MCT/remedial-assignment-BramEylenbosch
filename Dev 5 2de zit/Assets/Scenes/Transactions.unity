@@ -2171,7 +2171,7 @@ PrefabInstance:
       objectReference: {fileID: 1174886709}
     - target: {fileID: 429907680973279087, guid: 1d4dafdfdd66e024496d02a3eda73023, type: 3}
       propertyPath: resourceName
-      value: STONE
+      value: Stone
       objectReference: {fileID: 0}
     - target: {fileID: 429907680973279087, guid: 1d4dafdfdd66e024496d02a3eda73023, type: 3}
       propertyPath: resourceText
@@ -2864,7 +2864,7 @@ PrefabInstance:
       objectReference: {fileID: 1174886709}
     - target: {fileID: 429907680973279087, guid: 1d4dafdfdd66e024496d02a3eda73023, type: 3}
       propertyPath: resourceName
-      value: GOLD
+      value: Gold
       objectReference: {fileID: 0}
     - target: {fileID: 429907680973279087, guid: 1d4dafdfdd66e024496d02a3eda73023, type: 3}
       propertyPath: resourceText
@@ -3067,7 +3067,7 @@ PrefabInstance:
       objectReference: {fileID: 1174886709}
     - target: {fileID: 429907680973279087, guid: 1d4dafdfdd66e024496d02a3eda73023, type: 3}
       propertyPath: resourceName
-      value: WOOD
+      value: Wood
       objectReference: {fileID: 0}
     - target: {fileID: 429907680973279087, guid: 1d4dafdfdd66e024496d02a3eda73023, type: 3}
       propertyPath: resourceText
