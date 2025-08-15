@@ -8,5 +8,7 @@ namespace EconomySim.Database.Repositories
         int Insert(Transaction t);
         IEnumerable<Transaction> GetLatest(int count = 20);
         IEnumerable<Transaction> GetByResourceId(int resourceId, int count = 50);
+        IEnumerable<Transaction> GetByResourceName(string resourceName);
+
     }
 }

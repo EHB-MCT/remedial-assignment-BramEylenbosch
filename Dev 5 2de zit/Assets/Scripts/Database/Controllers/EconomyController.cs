@@ -80,15 +80,18 @@ public class EconomyController : MonoBehaviour
         if (priceText != null)
             priceText.text = $"€{res.Price:0.00}";
 
-        if (transactionsText != null)
-        {
-            var latest = DatabaseBootstrapper.Transactions
-                .GetLatest(3) // laatste 3
-                .Select(t => $"{t.ResourceName}: {t.Quantity} at €{t.Price:0.00}");
+        // Haal alleen de laatste 3 transacties op van de huidige resource
+        var lastTransactions = DatabaseBootstrapper.Transactions
+            .GetByResourceName(resourceName)
+            .OrderByDescending(t => t.Timestamp)
+            .Take(3)
+            .Select(t => $"{t.ResourceName}: {t.Quantity} at €{t.Price:0.00}")
+            .ToList();
 
-            transactionsText.text = "Last 3 transactions:\n" + string.Join("\n", latest);
-        }
+        if (transactionsText != null)
+            transactionsText.text = "Last 3 transactions:\n" + string.Join("\n", lastTransactions);
     }
+
 
 
     [ContextMenu("Reset Resource to 100")]

@@ -30,5 +30,12 @@ namespace EconomySim.Database.Repositories
                 .OrderByDescending(t => t.Timestamp)
                 .Take(count)
                 .ToList();
+        public IEnumerable<Transaction> GetByResourceName(string resourceName)
+        {
+            return _db.Connection.Table<Transaction>()
+                .Where(t => t.ResourceName == resourceName)
+                .OrderByDescending(t => t.Timestamp)
+                .ToList();
+        }
     }
 }
