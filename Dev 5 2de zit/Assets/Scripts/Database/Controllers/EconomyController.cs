@@ -2,7 +2,7 @@ using UnityEngine;
 using TMPro;
 using EconomySim.Database.Bootstrap;
 using EconomySim.Database.Models;
-using EconomySim.Simulation.Services;
+using EconomySim.Simulation.Services; // IPricingService & DynamicPricingService
 
 public class EconomyController : MonoBehaviour
 {
@@ -23,6 +23,7 @@ public class EconomyController : MonoBehaviour
 
     [Header("UI")]
     public TMP_Text resourceText;
+    public TMP_Text priceText;   
 
     private IPricingService _pricing;
 
@@ -59,13 +60,14 @@ public class EconomyController : MonoBehaviour
 
     private void UpdateUI()
     {
-        if (resourceText == null) return;
-
         var res = DatabaseBootstrapper.Resources.GetByName(resourceName);
-        if (res != null)
-            resourceText.text = $"{res.Name}: {res.Quantity}  |  €{res.Price:0.00}";
-        else
-            resourceText.text = $"{resourceName}: 0  |  €{basePrice:0.00}";
+        if (res == null) return;
+
+        if (resourceText != null)
+            resourceText.text = $"{res.Name}: {res.Quantity}";
+
+        if (priceText != null)
+            priceText.text = $"€{res.Price:0.00}";
     }
 
     [ContextMenu("Reset Resource to 100")]
