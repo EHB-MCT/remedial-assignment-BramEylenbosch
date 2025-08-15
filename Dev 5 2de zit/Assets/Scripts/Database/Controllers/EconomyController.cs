@@ -16,33 +16,46 @@ public class EconomyController : MonoBehaviour
     public int consumptionPerTick = 3;
 
     [Header("Pricing (Inspector)")]
-    public float basePrice   = 10f;
-    public float minPrice    = 0.5f;
-    public float maxPrice    = 50f;
-    public int   targetStock = 100;
-    public float elasticity  = 1.2f;
+    public float basePrice = 10f;
+    public float minPrice = 0.5f;
+    public float maxPrice = 50f;
+    public int targetStock = 100;
+    public float elasticity = 1.2f;
 
     [Header("UI")]
     public TMP_Text resourceText;
     public TMP_Text priceText;
-    public TMP_Text transactionsText; 
+    public TMP_Text transactionsText;
 
     private IPricingService _pricing;
 
     void Start()
     {
-        _pricing = new DynamicPricingService(minPrice, maxPrice, targetStock, elasticity);
+
+        DatabaseBootstrapper.Initialize();
+
+        var player = DatabaseBootstrapper.Players.GetById(1);
+        if (player == null)
+        {
+            player = new Player { Name = "Player1", Balance = 1000f };
+            DatabaseBootstrapper.Players.Insert(player);
+            Debug.Log("[DB] Player1 aangemaakt met 1000 coins.");
+        }
 
         var res = DatabaseBootstrapper.Resources.GetByName(resourceName);
         if (res == null)
         {
             res = new Resource { Name = resourceName, Quantity = 0, Price = basePrice };
             DatabaseBootstrapper.Resources.Insert(res);
+            Debug.Log($"[DB] Resource '{resourceName}' aangemaakt.");
         }
+
+        _pricing = new DynamicPricingService(minPrice, maxPrice, targetStock, elasticity);
 
         SimulationManager.Instance.OnTick += HandleTick;
         UpdateUI();
     }
+
 
     private void HandleTick()
     {
@@ -113,4 +126,77 @@ public class EconomyController : MonoBehaviour
         UpdateUI();
         Debug.Log($"[Economy] {resourceName} reset to 100.");
     }
+
+
+
+public void BuyResource(string resourceName)
+{
+    var player = DatabaseBootstrapper.Players.GetById(1);
+    var resource = DatabaseBootstrapper.Resources.GetByName(resourceName);
+
+    if (player == null || resource == null)
+    {
+        Debug.LogError("Player or resource not found!");
+        return;
+    }
+
+    if (player.Balance >= resource.Price)
+    {
+        player.Balance -= resource.Price;
+        resource.Quantity += 1;
+
+        DatabaseBootstrapper.Players.Update(player);
+        DatabaseBootstrapper.Resources.Update(resource);
+
+        DatabaseBootstrapper.Transactions.Insert(new Transaction
+        {
+            ResourceName = resource.Name,
+            Quantity = resource.Quantity,
+            Price = resource.Price,
+            Timestamp = System.DateTime.UtcNow
+        });
+
+        Debug.Log($"Bought 1 {resourceName} for €{resource.Price:0.00}");
+    }
+    else
+    {
+        Debug.Log("Not enough balance!");
+    }
+}
+
+public void SellResource(string resourceName)
+{
+    var player = DatabaseBootstrapper.Players.GetById(1);
+    var resource = DatabaseBootstrapper.Resources.GetByName(resourceName);
+
+    if (player == null || resource == null)
+    {
+        Debug.LogError("Player or resource not found!");
+        return;
+    }
+
+    if (resource.Quantity > 0)
+    {
+        player.Balance += resource.Price;
+        resource.Quantity -= 1;
+
+        DatabaseBootstrapper.Players.Update(player);
+        DatabaseBootstrapper.Resources.Update(resource);
+
+        DatabaseBootstrapper.Transactions.Insert(new Transaction
+        {
+            ResourceName = resource.Name,
+            Quantity = resource.Quantity,
+            Price = resource.Price,
+            Timestamp = System.DateTime.UtcNow
+        });
+
+        Debug.Log($"Sold 1 {resourceName} for €{resource.Price:0.00}");
+    }
+    else
+    {
+        Debug.Log("No resource to sell!");
+    }
+}
+
 }
