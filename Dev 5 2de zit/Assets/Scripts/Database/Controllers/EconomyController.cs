@@ -10,7 +10,11 @@ public class EconomyController : MonoBehaviour
     public string resourceName = "Wood";
     public int resourcePerTick = 5;
 
-    [Header("Pricing (tweak in Inspector)")]
+    [Header("Consumption")]
+    public bool enableConsumption = true;
+    public int consumptionPerTick = 3;
+
+    [Header("Pricing (Inspector)")]
     public float basePrice   = 10f;
     public float minPrice    = 0.5f;
     public float maxPrice    = 50f;
@@ -21,7 +25,6 @@ public class EconomyController : MonoBehaviour
     public TMP_Text resourceText;
 
     private IPricingService _pricing;
-    
 
     void Start()
     {
@@ -45,6 +48,9 @@ public class EconomyController : MonoBehaviour
 
         res.Quantity += resourcePerTick;
 
+        if (enableConsumption)
+            res.Quantity = Mathf.Max(0, res.Quantity - consumptionPerTick);
+
         res.Price = _pricing.Compute(basePrice, res.Quantity);
 
         DatabaseBootstrapper.Resources.Update(res);
@@ -57,12 +63,28 @@ public class EconomyController : MonoBehaviour
 
         var res = DatabaseBootstrapper.Resources.GetByName(resourceName);
         if (res != null)
-        {
             resourceText.text = $"{res.Name}: {res.Quantity}  |  €{res.Price:0.00}";
+        else
+            resourceText.text = $"{resourceName}: 0  |  €{basePrice:0.00}";
+    }
+
+    [ContextMenu("Reset Resource to 100")]
+    public void ResetResourceTo100()
+    {
+        var res = DatabaseBootstrapper.Resources.GetByName(resourceName);
+        if (res == null)
+        {
+            res = new Resource { Name = resourceName, Quantity = 100, Price = basePrice };
+            DatabaseBootstrapper.Resources.Insert(res);
         }
         else
         {
-            resourceText.text = $"{resourceName}: 0  |  €{basePrice:0.00}";
+            res.Quantity = 100;
+            res.Price = basePrice;
+            DatabaseBootstrapper.Resources.Update(res);
         }
+
+        UpdateUI();
+        Debug.Log($"[Economy] {resourceName} reset to 100.");
     }
 }
