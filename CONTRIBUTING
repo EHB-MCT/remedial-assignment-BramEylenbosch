@@ -1,0 +1,29 @@
+## Contributing
+
+# How to Contribute
+
+# Reporting Bugs🪲
+Search for existing issues before creating a new one.
+Provide detailed information please provide steps to reproduce, environment details, and any other relevant.
+
+# Suggesting Features💡
+Check if the feature has already been requested.
+When suggesting a new feature, include a clear explanation of why the feature is needed.
+
+# Making Code Changes🔧
+Fork the repo and create a new branch.
+Write tests that cover the changes you're making.
+Submit a pull request with a clear description of the changes you’ve made.
+
+# Branching Strategy & Naming🌳
+When making a new feature or resolving a bug, please create a new branch for each feature or bug fix.
+Branch names should be descriptive. For example, feature/new-feature or bugfix/issue-123.
+Make sure your commit messages are descriptive and follow the Conventional Commits format.
+Once your branch is ready, submit a pull request to the main branch.
+
+# Pull Request Process🤝
+Ensure your PR is descriptive: Include a description of what changes have been made and link related issues.
+Make sure to run tests before submitting your PR.
+
+# Contact📧
+If you have any questions, feel free to reach out to at bram.eylenbosch@student.ehb.be
